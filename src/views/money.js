@@ -36,7 +36,8 @@ export function viewMoney(ctx) {
     <div class="section__head"><h2 class="section__title">확인 필요 ${s.unknown.length}</h2><p class="section__aside">합계에 넣지 않음</p></div>
     <div class="list">${s.unknown.map((p) => {
       const ref = p.reference ? `참고액 ${money(ctx, p.reference.amountMinor, p.currency).orig}` : '';
-      return `<div class="list__row"><span class="list__main"><span class="list__title">${esc(p.label)}</span><span class="list__sub">${p.dueDate ? dateLabel(p.dueDate) : '날짜 미정'} · 결제 방식·금액 미확인${ref ? ` · ${ref}` : ''}</span></span><span class="amount${p.amountMinor == null ? ' amount--unknown' : ''}"><span class="amount__orig">${money(ctx, p.amountMinor, p.currency).orig}</span></span></div>`;
+      const what = p.amountMinor == null ? '금액·결제 방식 미확인' : '선결제인지 현장 결제인지 미확인';
+      return `<div class="list__row"><span class="list__main"><span class="list__title">${esc(p.label)}</span><span class="list__sub">${p.dueDate ? dateLabel(p.dueDate) : '날짜 미정'} · ${what}${ref ? ` · ${ref}` : ''}</span></span><span class="amount${p.amountMinor == null ? ' amount--unknown' : ''}"><span class="amount__orig">${money(ctx, p.amountMinor, p.currency).orig}</span></span></div>`;
     }).join('')}</div>
   </section>` : ''}
   ${markedPaid.length ? `

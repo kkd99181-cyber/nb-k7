@@ -44,7 +44,7 @@ export function board(ctx, day, { details }) {
     const guide = ctx.ix.audioByEvent?.get(ev.id);
     const tracks = guide?.tracks.filter((t) => t.file) ?? [];
     const head = `
-      <p class="board__time">${esc(main)}${tz}${sub ? `<small>${esc(sub)}</small>` : ''}</p>
+      <p class="board__time">${esc(main)}${sub ? `<small>${esc(sub)}</small>` : ''}${tz}</p>
       <div class="board__main">
         <p class="board__title">${esc(ev.title)}</p>
         ${ev.detail && !details ? `<p class="board__detail">${esc(ev.detail)}</p>` : ''}

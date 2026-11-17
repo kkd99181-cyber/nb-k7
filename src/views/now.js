@@ -1,6 +1,6 @@
 // 지금: 진행 중 · 다음 꼬리표 · 다음 이동 · 오늘 안내판 / 출발 전 D-day · 남은 준비
 import { findNowNext, tripPhase, dDay, currentDayId, formatDuration } from '../core/now.js';
-import { esc, chip, eventBadge, tzLabel, localTime, modeIcon, MODE_LABEL, dateLabel, BADGE, navButtons, legFrom } from '../ui.js';
+import { esc, chip, eventBadge, tzLabel, localTime, modeIcon, MODE_LABEL, dateLabel, BADGE, navButtons, legFrom, legTime, legTitle } from '../ui.js';
 import { isChecked } from '../state.js';
 import { board } from './days.js';
 
@@ -66,10 +66,12 @@ function nowCard(ctx, ev, next) {
 
 /** 다음 이동 구간(다음 일정이 이동이 아닐 때 따로 보여 줌). 시각 미정 구간은 날짜 기준 */
 function nextMove(ctx, next) {
-  const today = (tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(ctx.nowMs);
+  // 시각이 정해진 구간은 출발 전인 것, 미정 구간은 추정 끝이 아직 안 지난 것
   const leg = ctx.data.legs
-    .filter((l) => (l.from.atUtc ? l.from.atUtc > ctx.nowMs : (ctx.ix.bookings.get(l.bookingId)?.date ?? '') >= today(ctx.data.trip.homeTz)))
-    .sort((a, b) => (a.from.atUtc ?? Date.parse(ctx.ix.bookings.get(a.bookingId)?.date ?? 0)) - (b.from.atUtc ?? Date.parse(ctx.ix.bookings.get(b.bookingId)?.date ?? 0)))[0];
+    .map((l) => ({ l, t: legTime(ctx, l) }))
+    .filter(({ t }) => Number.isFinite(t.start)) // 날짜도 시각도 없는 구간은 다음 이동이 아님(이동 화면의 '날짜 미정'에만)
+    .filter(({ l, t }) => (l.from.atUtc ? t.start > ctx.nowMs : t.end > ctx.nowMs))
+    .sort((a, b) => a.t.start - b.t.start)[0]?.l;
   if (!leg || (next && next.legIds.includes(leg.id))) return '';
   const b = ctx.ix.bookings.get(leg.bookingId);
   const badge = leg.status === 'booked' ? BADGE.booked : BADGE.not_booked;
@@ -82,7 +84,7 @@ function nextMove(ctx, next) {
     <a class="list__row" href="#/moves" aria-label="다음 이동, 이동 화면 열기">
       <span class="leg__icon">${modeIcon(leg.mode)}</span>
       <span class="list__main">
-        <span class="list__title">${esc(leg.from.name ?? b.title)} → ${esc(leg.to.name ?? '')}</span>
+        <span class="list__title">${esc(legTitle(leg, b))}</span>
         <span class="list__sub">다음 ${MODE_LABEL[leg.mode] ?? '이동'} · ${esc(when)}</span>
       </span>
       ${chip(badge)}

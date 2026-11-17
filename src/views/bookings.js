@@ -1,7 +1,7 @@
 // 예약 · 이동(같은 탭, 위쪽 전환)
 import { bookingTotals } from '../core/money.js';
 import { formatDuration } from '../core/now.js';
-import { esc, icon, BADGE, money, moneyTotals, krwOf, fxNote, dateLabel, localTime, modeIcon, MODE_LABEL, bookingBadgeOf, linksOf, navButtons, legFrom } from '../ui.js';
+import { esc, icon, BADGE, money, moneyTotals, krwOf, fxNote, dateLabel, localTime, modeIcon, MODE_LABEL, bookingBadgeOf, linksOf, navButtons, legFrom, legTime } from '../ui.js';
 
 const KIND = { hotel: '숙소', flight: '항공', train: '열차', transfer: '이동', admission: '입장권' };
 const ADVANCE = {
@@ -160,8 +160,7 @@ function legTag(ctx, l) {
 
 export function viewMoves(ctx) {
   const dateOf = (l) => l.from.local?.slice(0, 10) ?? ctx.ix.bookings.get(l.bookingId)?.date ?? '';
-  const sortKey = (l) => l.from.atUtc ?? Date.parse(`${dateOf(l)}T12:00:00Z`);
-  const legs = [...ctx.data.legs].sort((a, b) => sortKey(a) - sortKey(b));
+  const legs = [...ctx.data.legs].sort((a, b) => legTime(ctx, a).start - legTime(ctx, b).start); // 미정 구간도 희망 시간대로 제자리에
   const groups = new Map();
   for (const l of legs) { const d = dateOf(l); if (!groups.has(d)) groups.set(d, []); groups.get(d).push(l); }
   const dayOf = (date) => ctx.data.days.find((d) => d.date === date);

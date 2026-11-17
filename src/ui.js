@@ -1,6 +1,6 @@
 // 화면 공용 조각. 모든 문자열은 esc()를 거쳐 넣는다.
 import { formatMoney, toKRW, bookingBadge } from './core/money.js';
-import { wallClock } from './core/tz.js';
+import { wallClock, zonedToUtc } from './core/tz.js';
 import { googleUrl, appleUrl } from './core/maps.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -90,6 +90,29 @@ export function navButtons(place, kind, label = '길안내', { small = false } =
     <a class="btn btn--line${sm} nav-pair__alt" href="${esc(appleUrl(place, kind))}" target="_blank" rel="noopener" aria-label="Apple 지도로 ${name} 길안내">Apple 지도</a>
   </div>`;
 }
+
+/**
+ * 구간의 대략적인 시작·끝(UTC ms). 시각이 정해진 구간은 그대로,
+ * 미정 구간은 희망 시간대(window) → 연결된 일정 → 그날 저녁 순으로 추정한다(정렬·"다음 이동" 판단용).
+ */
+export function legTime(ctx, l) {
+  if (l.from.atUtc) return { start: l.from.atUtc, end: l.to.atUtc ?? l.from.atUtc };
+  const b = ctx.ix.bookings.get(l.bookingId);
+  const date = b?.date;
+  if (!date) return { start: Infinity, end: Infinity };
+  const day = ctx.data.days.find((d) => d.date === date);
+  const tz = (day && ctx.ix.eventsByDay.get(day.id)?.[0]?.tz) ?? ctx.data.trip.homeTz;
+  if (l.window) return { start: zonedToUtc(date, l.window.from, tz), end: zonedToUtc(date, l.window.to, tz) };
+  const linked = ctx.data.events.filter((e) => e.bookingIds.includes(l.bookingId));
+  if (linked.length) return { start: Math.min(...linked.map((e) => e.startUtc)), end: Math.max(...linked.map((e) => e.endUtc)) };
+  // 단서가 없으면(예: 공항 → 숙소) 그날 도착하는 시각 정해진 구간 뒤로, 그것도 없으면 정오
+  const arrivals = ctx.data.legs.filter((x) => x.to.atUtc && x.to.local?.slice(0, 10) === date).map((x) => x.to.atUtc);
+  const start = arrivals.length ? Math.max(...arrivals) : zonedToUtc(date, '12:00', tz);
+  return { start, end: Math.max(start, zonedToUtc(date, '23:59', tz)) };
+}
+
+/** 구간 제목: 출발 → 도착(이름이 없으면 예약 제목) */
+export const legTitle = (l, b) => (l.from.name && l.to.name ? `${l.from.name} → ${l.to.name}` : (l.from.name ?? l.to.name ?? b?.title ?? '이동'));
 
 /** 구간 출발지(역·공항) */
 export const legFrom = (l) => (l?.from.name || l?.from.address ? { name: l.from.name, address: l.from.address } : null);

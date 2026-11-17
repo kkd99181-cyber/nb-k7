@@ -407,3 +407,9 @@ body.locked .player { display: none; }
 .player__btn:focus-visible { outline: 2.5px solid var(--band-onsite); outline-offset: 2px; }
 body.has-player .view { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 200px); }
 progress { width: 100%; height: 8px; accent-color: var(--ink); }
+
+/* A8 다듬기: 링크 행 밑줄 없음, 구간 시각은 줄바꿈 안 함, 시간대 표시는 블록 */
+a.list__row { text-decoration: none; color: inherit; }
+a.list__row .list__title { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.leg__time { flex: none; white-space: nowrap; }
+.board__tz { display: block; margin-left: 0; }
