@@ -2,8 +2,8 @@
 // 캐시 이름은 이 앱의 경로(scope)를 앞에 붙여, 같은 origin(github.io)의 다른 앱 캐시와 섞이거나 지우지 않는다.
 //  - `${PREFIX}app-<버전>`: 앱 셸·데이터·바우처(서비스 워커 책임, 새 버전마다 교체)
 //  - `${PREFIX}audio`: 오디오 암호문(화면 쪽 "전체 내려받기"·재생이 채움, 버전이 바뀌어도 유지)
-const VERSION = '10fdb39101d6';
-const PRECACHE = ["./","./d/62bc64bbc9e64244.bin","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./index.html","./m.json","./manifest.webmanifest","./robots.txt","./src/audio.js","./src/core/cryptobox.js","./src/core/maps.js","./src/core/money.js","./src/core/now.js","./src/core/tz.js","./src/data.js","./src/keystore.js","./src/main.js","./src/state.js","./src/sw-client.js","./src/ui.js","./src/views/bookings.js","./src/views/check.js","./src/views/days.js","./src/views/money.js","./src/views/now.js","./src/views/settings.js","./styles/base.css","./styles/components.css","./styles/tokens.css"];
+const VERSION = 'a0dce3e9fd3c';
+const PRECACHE = ["./","./d/db740bcbe4ae856c.bin","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./index.html","./m.json","./manifest.webmanifest","./robots.txt","./src/audio.js","./src/core/cryptobox.js","./src/core/maps.js","./src/core/money.js","./src/core/now.js","./src/core/tz.js","./src/data.js","./src/keystore.js","./src/main.js","./src/state.js","./src/sw-client.js","./src/ui.js","./src/views/bookings.js","./src/views/check.js","./src/views/days.js","./src/views/money.js","./src/views/now.js","./src/views/settings.js","./styles/base.css","./styles/components.css","./styles/tokens.css"];
 const PREFIX = `trip:${new URL(self.registration.scope).pathname}:`;
 const CACHE = `${PREFIX}app-${VERSION}`;
 const AUDIO = `${PREFIX}audio`;
