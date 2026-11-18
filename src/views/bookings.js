@@ -82,7 +82,11 @@ function bookingTag(ctx, b) {
   if (b.notes.length) rows += kvRow('메모', b.notes.map(esc).join('<br>'));
   const shown = b.voucher && ctx.openVouchers?.get(b.voucher);
   const showImg = shown && shown.type.startsWith('image/');
-  const links = linksOf(b.contact) + (b.voucher && !showImg ? `<button class="btn btn--sm" type="button" data-voucher="${esc(b.voucher)}" data-type="${esc(b.voucherType ?? '')}">${icon('file', 'icon icon--sm')}바우처 보기</button>` : '');
+  // PDF 등은 복호화가 끝나면 Blob 링크(새 창이 막혔거나 늦어도 사용자가 바로 누를 수 있게)
+  const voucherCtl = !b.voucher || showImg ? ''
+    : shown ? `<a class="btn btn--sm" href="${esc(shown.url)}" target="_blank" rel="noopener" data-voucher-link="${esc(b.voucher)}">${icon('file', 'icon icon--sm')}바우처 열기</a>`
+    : `<button class="btn btn--sm" type="button" data-voucher="${esc(b.voucher)}" data-type="${esc(b.voucherType ?? '')}">${icon('file', 'icon icon--sm')}바우처 보기</button>`;
+  const links = linksOf(b.contact) + voucherCtl;
   return `
   <article class="tag" data-state="${badge.state}" id="b-${esc(b.id)}">
     <div class="tag__band"><span>${badge.label}</span><span class="tag__band-meta">${KIND[b.kind] ?? ''}</span></div>

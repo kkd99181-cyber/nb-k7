@@ -129,11 +129,15 @@ async function showVoucher(btn) {
   const token = session;
   btn.disabled = true;
   try {
-    const url = await openAsset(name, type);
+    let url = await openAsset(name, type);
     if (token !== session || locked) { URL.revokeObjectURL(url); return; } // 그사이 잠금·화면 이동 → 버림
-    openVouchers.set(name, { url, type });
-    if (type.startsWith('image/')) render(); // 화면 안에 표시(다시 그려도 유지)
-    else window.open(url, '_blank', 'noopener');
+    const had = openVouchers.get(name);
+    if (had) { URL.revokeObjectURL(url); url = had.url; } // 다시 그린 버튼으로 두 번 요청된 경우: 먼저 연 Blob 하나만 유지
+    else openVouchers.set(name, { url, type });
+    // 이미지는 화면 안에, 그 밖(PDF)은 "바우처 열기" 링크로 표시(다시 그려도 유지).
+    // 복호화가 늦어 사용자 동작이 만료되면 새 창이 막힐 수 있어서, 아직 활성일 때만 바로 연다(빈 창을 미리 열지 않음)
+    if (!type.startsWith('image/') && navigator.userActivation?.isActive !== false) window.open(url, '_blank', 'noopener');
+    render();
   } catch (err) {
     if (token !== session || locked) return;
     const slot = btn.closest('.tag')?.querySelector('[data-voucher-slot]');
