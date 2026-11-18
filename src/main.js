@@ -78,21 +78,15 @@ function showVersion() {
   ctl.postMessage('VERSION');
 }
 
-let memoTimer = null;
 function bindViewEvents() {
   const view = $('view');
   view.addEventListener('change', (e) => {
     const t = e.target;
     if (t.dataset.check) { setChecked(t.dataset.check, t.checked); render(); }
     else if (t.dataset.paid) { setPaid(t.dataset.paid, t.checked); render(); }
-    else if (t.dataset.memo) { clearTimeout(memoTimer); setMemo(t.dataset.memo, t.value); }
   });
-  view.addEventListener('input', (e) => {
-    const t = e.target;
-    if (!t.dataset.memo) return;
-    clearTimeout(memoTimer);
-    memoTimer = setTimeout(() => setMemo(t.dataset.memo, t.value), 300);
-  });
+  // 메모는 입력할 때마다 바로 저장한다(앱이 곧바로 닫히거나 새로고침돼도 남도록)
+  view.addEventListener('input', (e) => { if (e.target.dataset.memo) setMemo(e.target.dataset.memo, e.target.value); });
   view.addEventListener('toggle', (e) => {
     const key = e.target.dataset?.row;
     if (key) { if (e.target.open) openRows.add(key); else openRows.delete(key); }
